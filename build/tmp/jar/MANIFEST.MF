@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Specification-Title: time_machine
+Specification-Vendor: varun
+Specification-Version: 1
+Implementation-Title: time-machine
+Implementation-Version: 1.20.1
+Implementation-Vendor: varun
+Implementation-Timestamp: 2026-05-10T02:14:42-0700
+

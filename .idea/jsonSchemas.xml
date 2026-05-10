@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JsonSchemaMappingsProjectConfiguration">
+    <state>
+      <map>
+        <entry key="Minecraft Resource Pack Lang">
+          <value>
+            <SchemaInfo>
+              <option name="name" value="Minecraft Resource Pack Lang" />
+              <option name="relativePathToSchema" value="https://www.schemastore.org/minecraft-lang.json" />
+              <option name="applicationDefined" value="true" />
+              <option name="patterns">
+                <list>
+                  <Item>
+                    <option name="path" value="src/main/resources/assets/lang/en_us.json" />
+                  </Item>
+                </list>
+              </option>
+            </SchemaInfo>
+          </value>
+        </entry>
+      </map>
+    </state>
+  </component>
+</project>
