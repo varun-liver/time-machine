@@ -136,13 +136,13 @@ Adding Libraries to Inheritance
 Reading Input: C:\Users\sreng\time machine\build\libs\time_machine-1.20.3.jar
 Adding input to inheritance map
 Processing entries
-Conflicting propagated mapping for com/time/client/BackupMenuScreen$BackupEntry/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/GuiEventListener/mouseClicked(DDI)Z: mouseClicked -> m_6375_
-Conflicting propagated mapping for com/time/client/BackupMenuScreen$BackupEntry/render(Lnet/minecraft/client/gui/GuiGraphics;IIIIIIIZF)V from net/minecraft/client/gui/components/AbstractSelectionList$Entry/render(Lnet/minecraft/client/gui/GuiGraphics;IIIIIIIZF)V: render -> m_6311_
-Conflicting propagated mapping for com/time/client/BackupMenuScreen$BackupEntry/getNarration()Lnet/minecraft/network/chat/Component; from net/minecraft/client/gui/components/ObjectSelectionList$Entry/getNarration()Lnet/minecraft/network/chat/Component;: getNarration -> m_142172_
 Conflicting propagated mapping for com/time/client/BackupMenuScreen/isPauseScreen()Z from net/minecraft/client/gui/screens/Screen/isPauseScreen()Z: isPauseScreen -> m_7043_
 Conflicting propagated mapping for com/time/client/BackupMenuScreen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V from net/minecraft/client/gui/screens/Screen/render(Lnet/minecraft/client/gui/GuiGraphics;IIF)V: render -> m_88315_
 Conflicting propagated mapping for com/time/client/BackupMenuScreen/onClose()V from net/minecraft/client/gui/screens/Screen/onClose()V: onClose -> m_7379_
 Conflicting propagated mapping for com/time/client/BackupMenuScreen/init()V from net/minecraft/client/gui/screens/Screen/init()V: init -> m_7856_
+Conflicting propagated mapping for com/time/client/BackupMenuScreen$BackupEntry/mouseClicked(DDI)Z from net/minecraft/client/gui/components/events/GuiEventListener/mouseClicked(DDI)Z: mouseClicked -> m_6375_
+Conflicting propagated mapping for com/time/client/BackupMenuScreen$BackupEntry/render(Lnet/minecraft/client/gui/GuiGraphics;IIIIIIIZF)V from net/minecraft/client/gui/components/AbstractSelectionList$Entry/render(Lnet/minecraft/client/gui/GuiGraphics;IIIIIIIZF)V: render -> m_6311_
+Conflicting propagated mapping for com/time/client/BackupMenuScreen$BackupEntry/getNarration()Lnet/minecraft/network/chat/Component; from net/minecraft/client/gui/components/ObjectSelectionList$Entry/getNarration()Lnet/minecraft/network/chat/Component;: getNarration -> m_142172_
 Conflicting propagated mapping for com/time/client/BackupMenuScreen$BackupSelectionList/getRowWidth()I from net/minecraft/client/gui/components/AbstractSelectionList/getRowWidth()I: getRowWidth -> m_5759_
 Conflicting propagated mapping for com/time/client/BackupMenuScreen$BackupSelectionList/getFocused()Lnet/minecraft/client/gui/components/events/GuiEventListener; from net/minecraft/client/gui/components/AbstractSelectionList/getFocused()Lnet/minecraft/client/gui/components/events/GuiEventListener;: getFocused -> m_7222_
 Conflicting propagated mapping for net/minecraft/world/entity/LivingEntity/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V from net/minecraft/world/entity/player/Player/lambda$addAdditionalSaveData$3(Lnet/minecraft/nbt/CompoundTag;Lnet/minecraft/nbt/Tag;)V: lambda$addAdditionalSaveData$3 -> m_219754_
