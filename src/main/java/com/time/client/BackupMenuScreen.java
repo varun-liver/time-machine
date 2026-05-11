@@ -143,9 +143,9 @@ public class BackupMenuScreen extends Screen {
         try {
             minecraft.execute(() -> {
                 if (minecraft.level != null) {
-                    minecraft.level.disconnect();
+                    minecraft.level.disconnect(Component.literal("Disconnecting for backup restore."));
                 }
-                minecraft.disconnect(createProgressScreen("Unloading world..."));
+                minecraft.disconnect(createProgressScreen("Unloading world..."), false);
             });
             waitForWorldUnload(minecraft, 10000L);
 
