@@ -6,7 +6,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
+import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -129,8 +129,7 @@ public class BackupMenuScreen extends Screen {
             }
 
             String worldId = worldFolder.getFileName().toString();
-            Component loadingMessage = Component.literal("Restoring backup and reloading world...");
-            minecraft.setScreen(new GenericDirtMessageScreen(loadingMessage));
+            minecraft.setScreen(createProgressScreen("Restoring backup and reloading world..."));
 
             Thread restoreThread = new Thread(() -> restoreAndReloadWorld(minecraft, server, worldFolder, worldId, backupDirectory), "time_machine-backup-restore");
             restoreThread.setDaemon(true);
@@ -146,17 +145,17 @@ public class BackupMenuScreen extends Screen {
                 if (minecraft.level != null) {
                     minecraft.level.disconnect();
                 }
-                minecraft.disconnect(new GenericDirtMessageScreen(Component.literal("Unloading world...")));
+                minecraft.disconnect(createProgressScreen("Unloading world..."));
             });
             waitForWorldUnload(minecraft, 10000L);
 
             clearDirectoryContents(worldFolder);
             copyDirectory(backupDirectory, worldFolder, true);
 
-            minecraft.execute(() -> minecraft.createWorldOpenFlows().checkForBackupAndLoad(worldId, () -> {
+            minecraft.execute(() -> minecraft.createWorldOpenFlows().openWorld(worldId, () -> {
             }));
         } catch (Exception exception) {
-            minecraft.execute(() -> minecraft.setScreen(new GenericDirtMessageScreen(Component.literal("Restore failed: " + exception.getMessage()))));
+            minecraft.execute(() -> minecraft.setScreen(createProgressScreen("Restore failed: " + exception.getMessage())));
         }
     }
 
@@ -231,6 +230,12 @@ public class BackupMenuScreen extends Screen {
             return "";
         }
         return sanitized;
+    }
+
+    private static ProgressScreen createProgressScreen(String message) {
+        ProgressScreen screen = new ProgressScreen(true);
+        screen.progressStartNoAbort(Component.literal(message));
+        return screen;
     }
 
     private static void clearDirectoryContents(Path directory) throws IOException {
