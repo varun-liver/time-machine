@@ -147,7 +147,7 @@ public class BackupMenuScreen extends Screen {
                 if (minecraft.level != null) {
                     minecraft.level.disconnect();
                 }
-                minecraft.clearLevel(new GenericDirtMessageScreen(Component.literal("Unloading world...")));
+                minecraft.disconnect(new GenericDirtMessageScreen(Component.literal("Unloading world...")));
             });
             waitForWorldUnload(minecraft, 10000L);
 
@@ -288,7 +288,7 @@ public class BackupMenuScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(guiGraphics);
+        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFF);
         guiGraphics.drawCenteredString(this.font, Component.literal("Backups"), this.width / 2, 58, 0xFFFFFF);
 
