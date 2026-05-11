@@ -4,6 +4,7 @@ import com.time.machine;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -12,7 +13,7 @@ import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
 
 public final class BackupClientEvents {
-    private static final String CATEGORY = "key.categories." + machine.MODID;
+    private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(ResourceLocation.fromNamespaceAndPath(machine.MODID, "general"));
     private static final KeyMapping OPEN_BACKUP_MENU = new KeyMapping(
             "key." + machine.MODID + ".open_backup_menu",
             GLFW.GLFW_KEY_B,
@@ -40,10 +41,6 @@ public final class BackupClientEvents {
 
         @SubscribeEvent
         public static void onClientTick(TickEvent.ClientTickEvent event) {
-            if (event.phase != TickEvent.Phase.END) {
-                return;
-            }
-
             Minecraft minecraft = Minecraft.getInstance();
             if (minecraft.player == null) {
                 return;
