@@ -3,7 +3,7 @@ Specification-Title: time_machine
 Specification-Vendor: varun
 Specification-Version: 1
 Implementation-Title: time-machine
-Implementation-Version: 1.21.4
+Implementation-Version: 1.21.5
 Implementation-Vendor: varun
-Implementation-Timestamp: 2026-05-10T22:32:53-0700
+Implementation-Timestamp: 2026-05-10T22:44:19-0700
 
