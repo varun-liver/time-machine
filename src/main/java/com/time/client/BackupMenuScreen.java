@@ -43,8 +43,7 @@ public class BackupMenuScreen extends Screen {
 
         int listTop = 54;
         int listBottom = this.height - 48;
-        this.backupSelectionList = new BackupSelectionList(this.minecraft, this.width - 40, listTop, listBottom, 24);
-        this.backupSelectionList.setLeftPos(20);
+        this.backupSelectionList = new BackupSelectionList(this.minecraft, this.width - 40, listBottom - listTop, listTop, 24);
         this.addRenderableWidget(this.backupSelectionList);
 
         this.backupNameBox = new EditBox(this.font, (this.width / 2) - 150, 24, 196, 20, Component.literal("Backup name"));
@@ -154,7 +153,8 @@ public class BackupMenuScreen extends Screen {
             clearDirectoryContents(worldFolder);
             copyDirectory(backupDirectory, worldFolder, true);
 
-            minecraft.execute(() -> minecraft.createWorldOpenFlows().loadLevel(new GenericDirtMessageScreen(Component.literal("Reloading world...")), worldId));
+            minecraft.execute(() -> minecraft.createWorldOpenFlows().checkForBackupAndLoad(worldId, () -> {
+            }));
         } catch (Exception exception) {
             minecraft.execute(() -> minecraft.setScreen(new GenericDirtMessageScreen(Component.literal("Restore failed: " + exception.getMessage()))));
         }
@@ -313,8 +313,8 @@ public class BackupMenuScreen extends Screen {
     }
 
     private final class BackupSelectionList extends ObjectSelectionList<BackupEntry> {
-        private BackupSelectionList(Minecraft minecraft, int width, int top, int bottom, int itemHeight) {
-            super(minecraft, width, bottom - top, top, bottom, itemHeight);
+        private BackupSelectionList(Minecraft minecraft, int width, int height, int top, int itemHeight) {
+            super(minecraft, width, height, top, itemHeight);
         }
 
         private void replaceEntries(List<Path> backupDirectories) {
