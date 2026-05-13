@@ -1,0 +1,11 @@
+{
+  "mappings.channel": "official",
+  "mappings.csv.artifact": "net.minecraft:mappings_official:26.1-20260326.105027@zip",
+  "mappings.csv.file": "C:\\Users\\sreng\\.gradle\\caches\\minecraftforge\\forgegradle\\mavenizer\\caches\\mcp\\de\\oceanlabs\\mcp\\mcp_config\\26.1-20260326.105027\\data\\mapings\\official\\26.1\\official.zip",
+  "mappings.version": "26.1",
+  "mc.version": "26.1",
+  "mcp.artifact": "de.oceanlabs.mcp:mcp_config:26.1-20260326.105027@zip",
+  "mcp.version": "26.1-20260326.105027",
+  "patcher.modules": "",
+  "spec": "1"
+}

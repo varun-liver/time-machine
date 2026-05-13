@@ -3,7 +3,7 @@ package com.time.client;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.EditBox;
@@ -293,17 +293,17 @@ public class BackupMenuScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFF);
-        guiGraphics.drawCenteredString(this.font, Component.literal("Backups"), this.width / 2, 58, 0xFFFFFF);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
+        this.extractBackground(guiGraphics, mouseX, mouseY, partialTick);
+        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
 
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.centeredText(this.font, this.title, this.width / 2, 8, 0xFFFFFF);
+        guiGraphics.centeredText(this.font, Component.literal("Backups"), this.width / 2, 58, 0xFFFFFF);
 
         List<FormattedCharSequence> lines = this.font.split(this.statusMessage, this.width - 40);
         int textY = this.height - 36;
         for (FormattedCharSequence line : lines) {
-            guiGraphics.drawCenteredString(this.font, line, this.width / 2, textY, 0xD0D0D0);
+            guiGraphics.centeredText(this.font, line, this.width / 2, textY, 0xD0D0D0);
             textY += this.font.lineHeight + 2;
         }
     }
@@ -344,9 +344,9 @@ public class BackupMenuScreen extends Screen {
         }
 
         @Override
-        public void renderContent(GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovered, float partialTick) {
+        public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float partialTick) {
             int color = hovered ? 0xFFFFFF : 0xD0D0D0;
-            guiGraphics.drawString(BackupMenuScreen.this.font, this.backupDirectory.getFileName().toString(), this.getContentX() + 4, this.getContentY() + 8, color);
+            guiGraphics.text(BackupMenuScreen.this.font, this.backupDirectory.getFileName().toString(), this.getContentX() + 4, this.getContentY() + 8, color);
         }
 
         @Override
