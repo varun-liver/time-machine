@@ -1,11 +1,11 @@
 package com.time;
 
-import net.minecraftforge.fml.common.Mod;
+import net.fabricmc.api.ModInitializer;
 
-@Mod(machine.MODID)
-public class machine {
+public class machine implements ModInitializer {
     public static final String MODID = "time_machine";
 
-    public machine() {
+    @Override
+    public void onInitialize() {
     }
 }

@@ -2,8 +2,7 @@ package com.time.client;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.EditBox;
@@ -44,7 +43,7 @@ public class BackupMenuScreen extends Screen {
 
         int listTop = 54;
         int listBottom = this.height - 48;
-        this.backupSelectionList = new BackupSelectionList(this.minecraft, this.width - 40, listBottom - listTop, listTop, 24);
+        this.backupSelectionList = new BackupSelectionList(this.minecraft, this.width, this.height, listTop, listBottom, 24);
         this.addRenderableWidget(this.backupSelectionList);
 
         this.backupNameBox = new EditBox(this.font, (this.width / 2) - 150, 24, 196, 20, Component.literal("Backup name"));
@@ -143,18 +142,14 @@ public class BackupMenuScreen extends Screen {
     private void restoreAndReloadWorld(Minecraft minecraft, MinecraftServer server, Path worldFolder, String worldId, Path backupDirectory) {
         try {
             minecraft.execute(() -> {
-                if (minecraft.level != null) {
-                    minecraft.level.disconnect(Component.literal("Disconnecting for backup restore."));
-                }
-                minecraft.disconnect(createProgressScreen("Unloading world..."), false);
+                minecraft.clearLevel(createProgressScreen("Unloading world..."));
             });
             waitForWorldUnload(minecraft, 10000L);
 
             clearDirectoryContents(worldFolder);
             copyDirectory(backupDirectory, worldFolder, true);
 
-            minecraft.execute(() -> minecraft.createWorldOpenFlows().openWorld(worldId, () -> {
-            }));
+            minecraft.execute(() -> minecraft.createWorldOpenFlows().loadLevel(this, worldId));
         } catch (Exception exception) {
             minecraft.execute(() -> minecraft.setScreen(createProgressScreen("Restore failed: " + exception.getMessage())));
         }
@@ -293,17 +288,17 @@ public class BackupMenuScreen extends Screen {
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.extractBackground(guiGraphics, mouseX, mouseY, partialTick);
-        super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        this.renderBackground(guiGraphics);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        guiGraphics.centeredText(this.font, this.title, this.width / 2, 8, 0xFFFFFF);
-        guiGraphics.centeredText(this.font, Component.literal("Backups"), this.width / 2, 58, 0xFFFFFF);
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFF);
+        guiGraphics.drawCenteredString(this.font, "Backups", this.width / 2, 58, 0xFFFFFF);
 
         List<FormattedCharSequence> lines = this.font.split(this.statusMessage, this.width - 40);
         int textY = this.height - 36;
         for (FormattedCharSequence line : lines) {
-            guiGraphics.centeredText(this.font, line, this.width / 2, textY, 0xD0D0D0);
+            guiGraphics.drawCenteredString(this.font, line, this.width / 2, textY, 0xD0D0D0);
             textY += this.font.lineHeight + 2;
         }
     }
@@ -319,8 +314,8 @@ public class BackupMenuScreen extends Screen {
     }
 
     private final class BackupSelectionList extends ObjectSelectionList<BackupEntry> {
-        private BackupSelectionList(Minecraft minecraft, int width, int height, int top, int itemHeight) {
-            super(minecraft, width, height, top, itemHeight);
+        private BackupSelectionList(Minecraft minecraft, int width, int height, int top, int bottom, int itemHeight) {
+            super(minecraft, width, height, top, bottom, itemHeight);
         }
 
         private void replaceEntries(List<Path> backupDirectories) {
@@ -344,14 +339,14 @@ public class BackupMenuScreen extends Screen {
         }
 
         @Override
-        public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float partialTick) {
-            int color = hovered ? 0xFFFFFF : 0xD0D0D0;
-            guiGraphics.text(BackupMenuScreen.this.font, this.backupDirectory.getFileName().toString(), this.getContentX() + 4, this.getContentY() + 8, color);
+        public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
+            int color = isMouseOver ? 0xFFFFFF : 0xD0D0D0;
+            guiGraphics.drawString(BackupMenuScreen.this.font, this.backupDirectory.getFileName().toString(), left + 4, top + 8, color);
         }
 
         @Override
-        public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-            if (event.button() == 0) {
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (button == 0) {
                 BackupMenuScreen.this.backupSelectionList.setSelected(this);
                 BackupMenuScreen.this.restoreBackup(this.backupDirectory);
                 return true;

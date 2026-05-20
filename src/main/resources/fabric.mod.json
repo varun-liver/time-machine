@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "time_machine",
+  "version": "${version}",
+  "name": "time machine fabric",
+  "description": "hi",
+  "authors": [
+    "varun"
+  ],
+  "contact": {},
+  "license": "All Rights Reserved",
+  "icon": "assets/time_machine/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.time.machine"
+    ],
+    "client": [
+      "com.time.client.BackupClientEvents"
+    ]
+  },
+  "mixins": [
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.11",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "fabric-api": "*"
+  },
+  "suggests": {
+  }
+}

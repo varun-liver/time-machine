@@ -1,57 +1,32 @@
 package com.time.client;
 
 import com.time.machine;
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.resources.Identifier;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
 
-public final class BackupClientEvents {
-    private static final KeyMapping.Category CATEGORY = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(machine.MODID, "general"));
+public final class BackupClientEvents implements ClientModInitializer {
     private static final KeyMapping OPEN_BACKUP_MENU = new KeyMapping(
             "key." + machine.MODID + ".open_backup_menu",
             GLFW.GLFW_KEY_B,
-            CATEGORY
+            "key.categories." + machine.MODID
     );
 
-    private BackupClientEvents() {
-    }
+    @Override
+    public void onInitializeClient() {
+        KeyBindingHelper.registerKeyBinding(OPEN_BACKUP_MENU);
 
-    @Mod.EventBusSubscriber(modid = machine.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static final class ModBusEvents {
-        private ModBusEvents() {
-        }
-
-        @SubscribeEvent
-        public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
-            event.register(OPEN_BACKUP_MENU);
-        }
-    }
-
-    @Mod.EventBusSubscriber(modid = machine.MODID, value = Dist.CLIENT)
-    public static final class ForgeBusEvents {
-        private ForgeBusEvents() {
-        }
-
-        @SubscribeEvent
-        public static void onClientTick(TickEvent.ClientTickEvent.Pre event) {
-            Minecraft minecraft = Minecraft.getInstance();
-            if (minecraft.player == null) {
-                return;
-            }
-
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (OPEN_BACKUP_MENU.consumeClick()) {
-                Screen currentScreen = minecraft.screen;
+                Screen currentScreen = client.screen;
                 if (!(currentScreen instanceof BackupMenuScreen)) {
-                    minecraft.setScreen(new BackupMenuScreen(currentScreen));
+                    client.setScreen(new BackupMenuScreen(currentScreen));
                 }
             }
-        }
+        });
     }
 }
