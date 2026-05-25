@@ -24,6 +24,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import com.mojang.serialization.Dynamic;
+import java.io.IOException;
 
 public class BackupMenuScreen extends Screen {
     private static final DateTimeFormatter BACKUP_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
@@ -149,7 +152,7 @@ public class BackupMenuScreen extends Screen {
             clearDirectoryContents(worldFolder);
             copyDirectory(backupDirectory, worldFolder, true);
 
-            minecraft.execute(() -> minecraft.createWorldOpenFlows().loadLevel(this, worldId));
+            minecraft.execute(() -> minecraft.createWorldOpenFlows().openWorld(worldId, () -> {}));
         } catch (Exception exception) {
             minecraft.execute(() -> minecraft.setScreen(createProgressScreen("Restore failed: " + exception.getMessage())));
         }
@@ -315,7 +318,7 @@ public class BackupMenuScreen extends Screen {
 
     private final class BackupSelectionList extends ObjectSelectionList<BackupEntry> {
         private BackupSelectionList(Minecraft minecraft, int width, int height, int top, int bottom, int itemHeight) {
-            super(minecraft, width, height, top, bottom, itemHeight);
+            super(minecraft, width, height, top, itemHeight);
         }
 
         private void replaceEntries(List<Path> backupDirectories) {
