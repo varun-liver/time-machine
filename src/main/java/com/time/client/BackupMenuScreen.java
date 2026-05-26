@@ -145,7 +145,7 @@ public class BackupMenuScreen extends Screen {
     private void restoreAndReloadWorld(Minecraft minecraft, MinecraftServer server, Path worldFolder, String worldId, Path backupDirectory) {
         try {
             minecraft.execute(() -> {
-                minecraft.disconnect(createProgressScreen("Unloading world..."));
+                minecraft.disconnect(createProgressScreen("Unloading world..."), false);
             });
             waitForWorldUnload(minecraft, 10000L);
 
