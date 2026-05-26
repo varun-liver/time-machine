@@ -8,6 +8,7 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.FormattedCharSequence;
@@ -342,14 +343,14 @@ public class BackupMenuScreen extends Screen {
         }
 
         @Override
-        public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
+        public void renderContent(GuiGraphics guiGraphics, int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
             int color = isMouseOver ? 0xFFFFFF : 0xD0D0D0;
-            guiGraphics.drawString(BackupMenuScreen.this.font, this.backupDirectory.getFileName().toString(), left + 4, top + 8, color);
+            guiGraphics.drawString(BackupMenuScreen.this.font, this.backupDirectory.getFileName().toString(), this.getContentX(), this.getContentY() + 8, color);
         }
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (button == 0) {
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+            if (event.button() == 0) {
                 BackupMenuScreen.this.backupSelectionList.setSelected(this);
                 BackupMenuScreen.this.restoreBackup(this.backupDirectory);
                 return true;

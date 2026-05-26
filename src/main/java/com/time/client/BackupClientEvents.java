@@ -7,14 +7,13 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
 
 public final class BackupClientEvents implements ClientModInitializer {
     private static final KeyMapping OPEN_BACKUP_MENU = new KeyMapping(
             "key." + machine.MODID + ".open_backup_menu",
             GLFW.GLFW_KEY_B,
-            "key.categories.misc"
+            KeyMapping.Category.MISC
     );
 
     @Override
