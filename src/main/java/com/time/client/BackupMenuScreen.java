@@ -1,13 +1,15 @@
 package com.time.client;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.ProgressScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.FormattedCharSequence;
@@ -24,12 +26,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.minecraft.world.level.storage.LevelStorageSource;
-import com.mojang.serialization.Dynamic;
-import java.io.IOException;
 
 public class BackupMenuScreen extends Screen {
-    private static final DateTimeFormatter BACKUP_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+    private static final DateTimeFormatter BACKUP_DATE_FORMAT = DateTimeFormatter.ofPattern("MM-dd-yy");
     private final Screen previousScreen;
     private Component statusMessage = Component.literal("Select a backup to restore, or create a new one.");
     private BackupSelectionList backupSelectionList;
@@ -45,8 +44,8 @@ public class BackupMenuScreen extends Screen {
         super.init();
 
         int listTop = 54;
-        int listBottom = this.height - 48;
-        this.backupSelectionList = new BackupSelectionList(this.minecraft, this.width, this.height, listTop, listBottom, 24);
+        int listHeight = this.height - 48 - listTop;
+        this.backupSelectionList = new BackupSelectionList(this.minecraft, this.width, listHeight, listTop, 24);
         this.addRenderableWidget(this.backupSelectionList);
 
         this.backupNameBox = new EditBox(this.font, (this.width / 2) - 150, 24, 196, 20, Component.literal("Backup name"));
@@ -71,16 +70,29 @@ public class BackupMenuScreen extends Screen {
 
     private List<Path> getBackupDirectoriesForCurrentWorld() {
         Path backupsDirectory = getCurrentWorldBackupsDirectory();
-        if (backupsDirectory == null || !Files.isDirectory(backupsDirectory)) {
+        if (backupsDirectory == null) {
+            setStatus(Component.literal("Could not determine backups directory.").withStyle(ChatFormatting.RED));
+            return List.of();
+        }
+
+        if (!Files.exists(backupsDirectory)) {
+            setStatus(Component.literal("No backups found. Searching in: " + backupsDirectory.toAbsolutePath()).withStyle(ChatFormatting.GRAY));
             return List.of();
         }
 
         try (Stream<Path> paths = Files.list(backupsDirectory)) {
-            return paths
+            List<Path> backups = paths
                     .filter(Files::isDirectory)
                     .filter(BackupMenuScreen::isValidWorldBackup)
                     .sorted(Comparator.comparing(BackupMenuScreen::lastModifiedOrMin).reversed())
                     .collect(Collectors.toList());
+
+            if (backups.isEmpty()) {
+                setStatus(Component.literal("Found directory but no valid backups in: " + backupsDirectory.toAbsolutePath()).withStyle(ChatFormatting.YELLOW));
+            } else {
+                setStatus(Component.literal("Found " + backups.size() + " backups.").withStyle(ChatFormatting.GREEN));
+            }
+            return backups;
         } catch (IOException exception) {
             setStatus(Component.literal("Could not read backups: " + exception.getMessage()).withStyle(ChatFormatting.RED));
             return List.of();
@@ -104,10 +116,18 @@ public class BackupMenuScreen extends Screen {
             }
 
             Path backupsDirectory = getWorldBackupsDirectory(worldFolder);
-            Files.createDirectories(backupsDirectory);
+            // We want to create the backup inside the specific backup folder
+            // instead of just the root backups directory
+            Path worldSpecificBackupDir = backupsDirectory.resolve(sanitizePathSegment(worldFolder.getFileName().toString()));
+            Files.createDirectories(worldSpecificBackupDir);
 
             String backupFolderName = buildBackupFolderName();
-            Path backupPath = backupsDirectory.resolve(backupFolderName);
+            Path backupPath = worldSpecificBackupDir.resolve(backupFolderName);
+
+            if (Files.exists(backupPath)) {
+                clearDirectoryContents(backupPath);
+            }
+
             copyDirectory(worldFolder, backupPath, true);
 
             refreshBackupList();
@@ -145,7 +165,7 @@ public class BackupMenuScreen extends Screen {
     private void restoreAndReloadWorld(Minecraft minecraft, MinecraftServer server, Path worldFolder, String worldId, Path backupDirectory) {
         try {
             minecraft.execute(() -> {
-                minecraft.disconnect(createProgressScreen("Unloading world..."));
+                minecraft.disconnect(createProgressScreen("Unloading world..."), false);
             });
             waitForWorldUnload(minecraft, 10000L);
 
@@ -183,16 +203,17 @@ public class BackupMenuScreen extends Screen {
     }
 
     private Path getWorldBackupsDirectory(Path worldFolder) {
-        return Minecraft.getInstance().gameDirectory.toPath()
-                .resolve("backups")
-                .resolve(sanitizePathSegment(worldFolder.getFileName().toString()));
+        // Point directly to the root backups directory
+        return Minecraft.getInstance().gameDirectory.toPath().resolve("backups");
     }
 
     private String buildBackupFolderName() {
         String typedName = this.backupNameBox != null ? this.backupNameBox.getValue().trim() : "";
         String safeName = sanitizePathSegment(typedName);
-        String timestamp = BACKUP_TIME_FORMAT.format(LocalDateTime.now());
-        return safeName.isEmpty() ? timestamp : safeName + "_" + timestamp;
+        if (safeName.isEmpty()) {
+            return BACKUP_DATE_FORMAT.format(LocalDateTime.now());
+        }
+        return safeName;
     }
 
     private void setStatus(Component message) {
@@ -218,7 +239,9 @@ public class BackupMenuScreen extends Screen {
     }
 
     private static boolean isValidWorldBackup(Path path) {
-        return Files.exists(path.resolve("level.dat"));
+        // For now, allow any directory in the backups folder to be visible in the menu.
+        // We will verify the level.dat during the actual restore process.
+        return Files.isDirectory(path);
     }
 
     private static String sanitizePathSegment(String value) {
@@ -238,6 +261,7 @@ public class BackupMenuScreen extends Screen {
     }
 
     private static void clearDirectoryContents(Path directory) throws IOException {
+        if (!Files.exists(directory)) return;
         try (Stream<Path> paths = Files.walk(directory)) {
             List<Path> toDelete = paths
                     .filter(path -> !path.equals(directory))
@@ -291,17 +315,16 @@ public class BackupMenuScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor extractor, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(extractor, mouseX, mouseY, partialTick);
 
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 8, 0xFFFFFF);
-        guiGraphics.drawCenteredString(this.font, "Backups", this.width / 2, 58, 0xFFFFFF);
+        extractor.centeredText(this.font, this.title, this.width / 2, 8, 0xFFFFFF);
+        extractor.centeredText(this.font, "Backups", this.width / 2, 58, 0xFFFFFF);
 
         List<FormattedCharSequence> lines = this.font.split(this.statusMessage, this.width - 40);
         int textY = this.height - 36;
         for (FormattedCharSequence line : lines) {
-            guiGraphics.drawCenteredString(this.font, line, this.width / 2, textY, 0xD0D0D0);
+            extractor.centeredText(this.font, line, this.width / 2, textY, 0xD0D0D0);
             textY += this.font.lineHeight + 2;
         }
     }
@@ -317,7 +340,7 @@ public class BackupMenuScreen extends Screen {
     }
 
     private final class BackupSelectionList extends ObjectSelectionList<BackupEntry> {
-        private BackupSelectionList(Minecraft minecraft, int width, int height, int top, int bottom, int itemHeight) {
+        private BackupSelectionList(Minecraft minecraft, int width, int height, int top, int itemHeight) {
             super(minecraft, width, height, top, itemHeight);
         }
 
@@ -336,22 +359,28 @@ public class BackupMenuScreen extends Screen {
 
     private final class BackupEntry extends ObjectSelectionList.Entry<BackupEntry> {
         private final Path backupDirectory;
+        private long lastClickTime;
 
         private BackupEntry(Path backupDirectory) {
             this.backupDirectory = backupDirectory;
         }
 
         @Override
-        public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTick) {
+        public void extractContent(GuiGraphicsExtractor extractor, int index, int top, boolean isMouseOver, float partialTick) {
             int color = isMouseOver ? 0xFFFFFF : 0xD0D0D0;
-            guiGraphics.drawString(BackupMenuScreen.this.font, this.backupDirectory.getFileName().toString(), left + 4, top + 8, color);
+            extractor.text(BackupMenuScreen.this.font, this.backupDirectory.getFileName().toString(), 4, top + 8, color);
         }
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (button == 0) {
-                BackupMenuScreen.this.backupSelectionList.setSelected(this);
-                BackupMenuScreen.this.restoreBackup(this.backupDirectory);
+        public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+            if (event.button() == 0) {
+                long currentTime = Util.getMillis();
+                if (currentTime - this.lastClickTime < 250L) {
+                    BackupMenuScreen.this.restoreBackup(this.backupDirectory);
+                } else {
+                    BackupMenuScreen.this.backupSelectionList.setSelected(this);
+                }
+                this.lastClickTime = currentTime;
                 return true;
             }
 
